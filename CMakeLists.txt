@@ -3,4 +3,7 @@ project(CSE245_Algorithms_Project)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(CSE245_Algorithms_Project src/main.cpp)
+add_executable(
+        CSE245_Algorithms_Project src/main.cpp
+        li/Task3.h
+)
