@@ -1,3 +1,0 @@
-C:/Users/ahmed/Documents/GitHub/Project/CSE245-Algorithms-Project/cmake-build-debug/CMakeFiles/CSE245_Algorithms_Project.dir
-C:/Users/ahmed/Documents/GitHub/Project/CSE245-Algorithms-Project/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/ahmed/Documents/GitHub/Project/CSE245-Algorithms-Project/cmake-build-debug/CMakeFiles/rebuild_cache.dir
