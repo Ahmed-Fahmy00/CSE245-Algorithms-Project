@@ -1,0 +1,11 @@
+# Ignore everything
+*
+
+# But not these:
+!*.cpp
+!*.h
+!CMakeLists.txt
+
+# Also keep .gitignore and README files if needed
+!.gitignore
+!README.md
