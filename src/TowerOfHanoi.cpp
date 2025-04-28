@@ -67,7 +67,7 @@ int TowerOfHanoi::optimalK(int n) {
 
     for (int k = 1; k < n; ++k) {
         int moves = 2 * calcMinMoves(k) + pow(2, n - k) - 1;
-        if (moves == minMoves) {
+        if (moves < minMoves) {
             minMoves = moves;
             bestK = k;
         }
