@@ -5,6 +5,7 @@
 !*.cpp
 !*.h
 !CMakeLists.txt
+!*.iml
 
 # Also keep .gitignore and README files if needed
 !.gitignore
