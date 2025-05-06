@@ -1,80 +1,118 @@
 #include <iostream>
 #include <vector>
+#include <set>
+#include <map>
+#include <tuple>
+#include <iomanip>
+
 using namespace std;
 
-typedef pair<int, int> Point;
+const int MAXN = 10;
 
-// Build a path that uses exactly 2n-2 lines to cover all n^2 points
-vector<Point> buildOptimalPathDP(int n) {
-    vector<Point> path;
+int n;
+int targetLines;
+set<pair<int, int>> visited;
+vector<pair<int, int>> path;
+map<tuple<int, int, int, int>, bool> memo;
 
-    // Start from top-left and go down the first column
-    for (int r = 0; r < n; ++r) {
-        path.emplace_back(r, 0);
-    }
+int dx[4] = {0, 1, 0, -1}; // right, down, left, up
+int dy[4] = {1, 0, -1, 0};
 
-    // Now go right and zigzag up/down each column
-    bool goingUp = true;
-    for (int c = 1; c < n; ++c) {
-        if (goingUp) {
-            for (int r = n - 1; r >= 0; --r) {
-                path.emplace_back(r, c);
-            }
-        } else {
-            for (int r = 0; r < n; ++r) {
-                path.emplace_back(r, c);
-            }
-        }
-        goingUp = !goingUp;
-    }
-
-    return path;
+bool isValid(int x, int y) {
+    return x >= 0 && x < n && y >= 0 && y < n;
 }
 
-void printPath(const vector<Point>& path) {
-    for (const auto& p : path) {
-        cout << "(" << p.first << ", " << p.second << ") -> ";
+// DP + Backtracking
+bool dfs(int x, int y, int dir, int linesUsed) {
+    if (visited.size() == n * n && linesUsed == targetLines) {
+        return true;
     }
-    cout << "END\n";
-}
 
-// Count the number of straight line segments in the path
-int countLines(const vector<Point>& path) {
-    if (path.size() < 2) return 0;
-    int lines = 1;
+    auto key = make_tuple(x, y, dir, linesUsed);
+    if (memo.count(key)) return false;
+    memo[key] = true;
 
-    int dx = path[1].first - path[0].first;
-    int dy = path[1].second - path[0].second;
+    for (int newDir = 0; newDir < 4; ++newDir) {
+        int nx = x + dx[newDir];
+        int ny = y + dy[newDir];
 
-    for (size_t i = 2; i < path.size(); ++i) {
-        int ndx = path[i].first - path[i - 1].first;
-        int ndy = path[i].second - path[i - 1].second;
+        if (!isValid(nx, ny)) continue;
 
-        if (ndx != dx || ndy != dy) {
-            ++lines;
-            dx = ndx;
-            dy = ndy;
+        bool isNewLine = (newDir != dir);
+        int newLinesUsed = linesUsed + isNewLine;
+
+        if (newLinesUsed > targetLines) continue;
+
+        if (visited.count({nx, ny}) == 0) {
+            visited.insert({nx, ny});
+            path.push_back({nx, ny});
+
+            if (dfs(nx, ny, newDir, newLinesUsed)) {
+                return true;
+            }
+
+            path.pop_back();
+            visited.erase({nx, ny});
         }
     }
 
-    return lines;
+    return false;
+}
+
+void printMatrixPath() {
+    vector<vector<int>> grid(n, vector<int>(n, 0));
+    for (int i = 0; i < path.size(); ++i) {
+        int x = path[i].first;
+        int y = path[i].second;
+        grid[x][y] = i + 1;
+    }
+
+    cout << "\nPath Matrix:\n";
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            cout << setw(3) << grid[i][j] << " ";
+        }
+        cout << endl;
+    }
 }
 
 int main() {
-    int n;
-    cout << "Enter the value of n (n > 2): ";
+    cout << "Enter grid size n (n > 2): ";
     cin >> n;
 
-    if (n <= 2) {
-        cout << "Invalid input. n must be > 2.\n";
+    if (n <= 2 || n > MAXN) {
+        cout << "n must be between 3 and " << MAXN << ".\n";
         return 1;
     }
 
-    auto path = buildOptimalPathDP(n);
-    printPath(path);
-    cout << "Total points crossed: " << path.size() << "\n";
-    cout << "Minimum number of straight lines used: " << countLines(path)
-         << " (Expected: " << (2 * n - 2) << ")\n";
+    targetLines = 2 * n - 2;
+    bool found = false;
+
+    for (int startDir = 0; startDir < 2; ++startDir) { // try right and down
+        path.clear();
+        visited.clear();
+        memo.clear();
+
+        visited.insert({0, 0});
+        path.push_back({0, 0});
+
+        if (dfs(0, 0, startDir, 0)) {
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
+        cout << "\nPath found:\n";
+        for (auto& p : path) {
+            cout << "(" << p.first << ", " << p.second << ") -> ";
+        }
+        cout << "END\n";
+        cout << "\nTotal Points: " << path.size() << ", Total Lines Used: " << targetLines << endl;
+        printMatrixPath();
+    } else {
+        cout << "No path found with exactly " << targetLines << " lines.\n";
+    }
 
     return 0;
 }
