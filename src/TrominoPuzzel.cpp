@@ -2,8 +2,9 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <map>
+#include <set>
 #include <windows.h>
-#include <vector>
 
 using namespace std;
 
@@ -12,11 +13,11 @@ TrominoPuzzel::TrominoPuzzel(int n, int x, int y) {
     yMiss= y;
     board[xMiss][yMiss] = -1;
 
-    tileCount = 0;
+    tileCount = 1;
     size = pow(2, n);
 }
 
-void TrominoPuzzel::solveTromino(int size, int missingX, int missingY, int topX, int topY) {
+void TrominoPuzzel::solveTrominoDAC(int size, int missingX, int missingY, int topX, int topY) {
     if (size == 2) {
         int trominoID = tileCount++;
         for (int i = 0; i < 2; i++) {
@@ -49,72 +50,108 @@ void TrominoPuzzel::solveTromino(int size, int missingX, int missingY, int topX,
     }
 
     for (int i = 0; i < 4; i++) {
-        solveTromino(half, newMissingX[i], newMissingY[i], quadX[i], quadY[i]);
+        solveTrominoDAC(half, newMissingX[i], newMissingY[i], quadX[i], quadY[i]);
     }
 }
 
+bool TrominoPuzzel::solveTrominoBT() {
+    int r = -1, c = -1;
+    bool flag = false;
+
+    for (int i = 0; i < size; ++i){
+        for (int j = 0; j < size; ++j){
+            if (board[i][j] == 0) {
+                r = i;
+                c = j;
+                flag = true;
+                break;
+            }
+        }
+        if (flag) break;
+    }
+
+    if (r == -1) return true;
+
+    int relativeCoords[8][2][2] = {
+        {{+1, 0}, {0, +1}},
+        {{-1, 0}, {0, +1}},
+        {{+1, 0}, {0, -1}},
+        {{-1, 0}, {0, -1}},
+        {{-1, 0}, {-1, +1}},
+        {{-1, 0}, {-1, -1}},
+        {{+1, 0}, {+1, +1}},
+        {{+1, 0}, {+1, -1}}
+    };
+
+    for (int i = 0; i < 8; ++i) {
+        int r1 = r + relativeCoords[i][0][0];
+        int c1 = c + relativeCoords[i][0][1];
+        int r2 = r + relativeCoords[i][1][0];
+        int c2 = c + relativeCoords[i][1][1];
+
+        if (r1 >= 0 && r1 < size && c1 >= 0 && c1 < size &&
+            r2 >= 0 && r2 < size && c2 >= 0 && c2 < size &&
+            board[r1][c1] == 0 && board[r2][c2] == 0) {
+
+            int currentTileID = ++tileCount;
+            board[r][c] = currentTileID;
+            board[r1][c1] = currentTileID;
+            board[r2][c2] = currentTileID;
+
+            if (solveTrominoBT()) return true;
+
+            board[r][c] = 0;
+            board[r1][c1] = 0;
+            board[r2][c2] = 0;
+            tileCount--;
+        }
+    }
+    return false;
+}
+
 void TrominoPuzzel::assignColors() {
-    if (colored) return; // Only color once
+    if (colored) return;
     colored = true;
 
-    // Use a temporary board to keep original tile IDs while coloring
     int tempBoard[128][128];
     for (int i = 0; i < size; ++i) {
         for (int j = 0; j < size; ++j) {
-            tempBoard[i][j] = board[i][j]; // Copy original IDs
+            tempBoard[i][j] = board[i][j];
         }
     }
 
-    // Map to store the assigned color for each original tromino ID
-    // Max tile ID is tileCount - 1. Size depends on size of board.
-    // A map is flexible, or an array sized based on max possible tileCount
-    // Max tiles = (size*size - 1) / 3. For size 128, this is ~5461.
-    // Let's use an array for performance, assuming tile IDs are contiguous from 0.
-    int trominoColors[128*128/3 + 5]; // Array to hold colors for tile IDs 0 to tileCount-1
+    int trominoColors[128*128/3 + 5];
     for(int i = 0; i < (128*128/3 + 5); ++i) {
-        trominoColors[i] = 0; // 0 means uncolored
+        trominoColors[i] = 0;
     }
-
 
     int dx[] = {-1, 1, 0, 0};
     int dy[] = {0, 0, -1, 1};
 
-    // Iterate through the board to find each uncolored tromino tile by its ID
     for (int i = 0; i < size; ++i) {
         for (int j = 0; j < size; ++j) {
             int currentTrominoID = tempBoard[i][j];
 
-            // Skip the missing tile or already colored trominoes
             if (currentTrominoID == -1 || trominoColors[currentTrominoID] != 0) {
                 continue;
             }
 
-            // This is the first cell we've encountered for this uncolored tromino ID.
-            // Find colors used by adjacent trominoes.
-            bool usedColors[5] = {false}; // Indices 1, 2, 4 will be used
-
-            // Iterate through the board to find all cells belonging to the current tromino ID
-            // and check their neighbors.
+            bool usedColors[5] = {false};
             for (int x = 0; x < size; ++x) {
                 for (int y = 0; y < size; ++y) {
-                    if (tempBoard[x][y] == currentTrominoID) { // Found a cell of the current tromino
-                        // Check its neighbors
+                    if (tempBoard[x][y] == currentTrominoID) {
                         for (int d = 0; d < 4; ++d) {
                             int nx = x + dx[d];
                             int ny = y + dy[d];
 
-                            // Check bounds
                             if (nx >= 0 && ny >= 0 && nx < size && ny < size) {
                                 int neighborTrominoID = tempBoard[nx][ny];
-
-                                // If the neighbor is part of a DIFFERENT tromino tile (and not the missing square)
                                 if (neighborTrominoID != currentTrominoID && neighborTrominoID != -1) {
-                                    // Check if the neighbor tromino has already been colored
                                     if (trominoColors[neighborTrominoID] != 0) {
                                         int neighborColor = trominoColors[neighborTrominoID];
-                                        if (neighborColor == 1 || neighborColor == 2 || neighborColor == 4) {
+                                        if (neighborColor == 1 || neighborColor == 2 || neighborColor == 4)
                                             usedColors[neighborColor] = true;
-                                        }
+
                                     }
                                 }
                             }
@@ -123,20 +160,16 @@ void TrominoPuzzel::assignColors() {
                 }
             }
 
-            // Choose a color for the current tromino ID that hasn't been used by its neighbors
             int chosenColor = 0;
             if (!usedColors[1]) {
                 chosenColor = 1; // Try color 1 (BLUE)
             } else if (!usedColors[2]) {
                 chosenColor = 2; // Try color 2 (GREEN)
             } else {
-                chosenColor = 4; // Default to color 4 (RED) - there should always be an available color among these 3
+                chosenColor = 4; // Default to color 4 (RED)
             }
 
-            // Store the chosen color for this tromino ID
             trominoColors[currentTrominoID] = chosenColor;
-
-            // Now, apply this chosen color to all cells on the main board belonging to this tromino ID
             for (int x = 0; x < size; ++x) {
                 for (int y = 0; y < size; ++y) {
                     if (tempBoard[x][y] == currentTrominoID) {
@@ -146,9 +179,7 @@ void TrominoPuzzel::assignColors() {
             }
         }
     }
-    // The missing tile (-1) remains -1 in the board.
 }
-
 
 enum Colors {
     BLACK = 0,
@@ -173,11 +204,7 @@ void TrominoPuzzel::printBoard() {
                 cout << " X ";
             } else {
                 SetColor(static_cast<Colors>(board[i][j]), BLACK);
-                if(board[i][j] < 10) {
-                    cout << "  "  <<" ";
-                } else {
-                    cout << "  "  <<" ";
-                }
+                cout << "  " <<" ";
             }
         }
         cout << endl;

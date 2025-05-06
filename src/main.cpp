@@ -23,8 +23,10 @@ int main()
     }
 
     TrominoPuzzel trominoPuzzle(n, xMiss, yMiss);
-    trominoPuzzle.solveTromino(trominoPuzzle.size, xMiss, yMiss, 0, 0);
+    trominoPuzzle.solveTrominoDAC(trominoPuzzle.size, xMiss, yMiss, 0, 0);
+    //trominoPuzzle.solveTrominoBT();
     trominoPuzzle.printBoard();
+
     cin >> n ;
     return 0;
 }
