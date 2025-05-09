@@ -3,8 +3,10 @@
 using namespace std;
 
 int main() {
-
-    while (true) {
+    cout << "Enter 0/1: ";
+    int choice;
+    cin >> choice;
+    while (choice == 1) {
         cout <<"Enter the value of n for the n x n grid ( n > 2 ): ";
         int n;
         cin >> n;
@@ -16,6 +18,8 @@ int main() {
             //lattice.solveDP();
             cout << "Minimum moves required: " << lattice.moves << endl;
         }
+        cout << "Enter 0/1: ";
+        cin >> choice;
     }
 
 }
