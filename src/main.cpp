@@ -10,7 +10,7 @@ int main() {
         cin >> n;
         if (n <= 2) {
             cout << "Invalid input. Please enter a value greater than 2." << endl;
-        }else {
+        } else {
             PointLattice lattice(n);
             cout << "Enter 1 to solve using Greedy, 2 to solve using Dynamic Programming: ";
             int method;

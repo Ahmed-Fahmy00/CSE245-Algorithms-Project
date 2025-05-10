@@ -2,6 +2,15 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <unordered_set>
+#include <functional>
+#include <tuple>
+#include <set>
+#include <unordered_map>
+#include <functional>
+#include <bitset>
+#include <cstdint>
+
 using namespace std;
 
 PointLattice::PointLattice(int size) {
@@ -66,3 +75,4 @@ void PointLattice::solveGreedy() {
 void PointLattice::solveDP() {
 
 }
+
