@@ -5,7 +5,7 @@
 !*.cpp
 !*.h
 !CMakeLists.txt
-!TowerofHanoi.exe
+!Task3.exe
 !Tower of Hanoi.pdf
 
 # Also keep .gitignore and README files if needed
