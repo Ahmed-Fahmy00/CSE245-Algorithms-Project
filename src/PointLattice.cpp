@@ -1,21 +1,12 @@
 #include "PointLattice.h"
 #include <iostream>
-#include <vector>
+
 #include <cmath>
-#include <unordered_set>
-#include <functional>
-#include <tuple>
-#include <set>
-#include <unordered_map>
-#include <functional>
-#include <bitset>
-#include <cstdint>
 
 using namespace std;
 
 PointLattice::PointLattice(int size) {
     n= size;
-    grid.resize(n + 2, vector<int>(n + 2, 0));
     moves = 0;
 }
 
@@ -30,49 +21,69 @@ void PointLattice::move(int &startX, int &startY, int endX, int endY) {
     startY= endY;
 }
 
-void PointLattice::solveGreedy() {
-    if (n <= 2) {
-        cout << "Greedy solution is only implemented for 3x3 (n=2) grid.\n";
+void PointLattice::solveDP() {
+    if (n < 3) {
+        cout << "DP solution is only implemented for n >= 3.\n";
         return;
     }
 
-    int X = n%2 == 0 ? ( n / 2 ) - 1: round(n / 2) ;
+    int X = n%2 == 0 ?  n / 2  - 1: round(n / 2) ;
     int Y = round(n / 2) ;
+
+    moves = 0;
 
     move(X, Y, X + 2, Y + 2);
     move(X, Y, X    , Y - 3);
     move(X, Y, X - 3, Y + 3);
     move(X, Y, X + 4, Y    );
 
-    if(moves == minmoves() ) return ;
-    move(X, Y, X , Y -3);
+    if (moves == minmoves()) return;
+    move(X, Y, X, Y - 3);
 
-    int count = -4;
+    int step = 4;
     bool flag = true;
-    while (moves < minmoves() ) {
-        if (flag)
-            move(X, Y, X + count, Y );
-        else
-            move(X, Y, X + abs(count), Y );
 
-        if (moves == minmoves() ) return ;
+    while (moves < minmoves()) {
+        if (flag) {
+            move(X, Y, X + step, Y);  // right
+        } else {
+            move(X, Y, X - step, Y);  // left
+        }
 
-        if (flag)
-            move(X, Y, X , Y + abs(count));
-        else
-            move(X, Y, X , Y + count);
+        if (moves == minmoves()) return;
 
-        if (flag)
-            flag= false;
-        else
-            flag = true;
+        if (flag) {
+            move(X, Y, X, Y + step);  // down
+        } else {
+            move(X, Y, X, Y - step);  // up
+        }
 
-        count --;
+        flag = !flag;
+        step++;
+    }
+}
+
+void PointLattice::solveGreedy() {
+    if (n < 3) {
+        cout << "Grid size must be at least 3x3 for this solution.\n";
+        return;
     }
 
+    int startX = 1, startY = 1;
+    moves = 0;
+
+    for (int i = 1; i <= n; ++i) {
+        if (i % 2 == 1) {
+            move(startX, startY, n, startY);
+            startX = n;
+        } else {
+            move(startX, startY, 1, startY);
+            startX = 1;
+        }
+
+        if (i < n) {
+            move(startX, startY, startX, startY + 1);
+            startY++;
+        }
+    }
 }
-
-void PointLattice::solveDP() {
-
-}
-
