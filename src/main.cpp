@@ -13,12 +13,12 @@ int main() {
         cout << "\t 2- Solve the given problem using Greedy \n";
         cout << "\t 3- Exit \n";
 
-        char choice = _getch();
+        char choice;
+        cin >> choice;
         switch (choice) {
             case '1': {
                 system("cls");
                 cout << "Enter the value of n for the n x n grid ( n > 2 ): ";
-
                 int n;
                 cin >> n;
                 if (n <= 2) {
@@ -29,10 +29,10 @@ int main() {
                     cout << "Minimum moves required: " << lattice1.moves << endl;
                 }
                 break;
+
             } case '2': {
                 system("cls");
                 cout << "Enter the value of n for the n x n grid ( n > 2 ): ";
-
                 int n;
                 cin >> n;
                 if (n <= 2) {
@@ -43,6 +43,7 @@ int main() {
                     cout << "Moves Made: " << lattice2.moves << endl;
                 }
                 break;
+
             } case '3': {
                 cout << "Exiting program...\n";
                 return 0;
